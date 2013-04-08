@@ -50,7 +50,8 @@ function getAllGames() {
             if (i > 0) {
                 json = json + ',\n';
             }
-            json = json + '{"id": "' + row.id + '", "win_limit": "' + row.win_limit + '", "win_count": "' + row.win_count + '", "user_limit": "' + row.user_limit + '", "created_date":"' + row.created_date + '"}';
+            var randomnumber = Math.floor(Math.random() * row.user_limit) + 1;
+            json = json + '{"id": "' + row.id + '", "win_limit": "' + row.win_limit + '", "win_count": "' + row.win_count + '", "user_limit": "' + row.user_limit + '","user_count":"' + randomnumber + '", "created_date":"' + row.created_date + '"}';
           
             i++;
         });
@@ -169,15 +170,13 @@ function runServer() {
 
 
 
-    }).listen('8124');
+    }).listen('1111');
 
 }
 
 
 function queryDone() {
 
-    console.log("queryDone");
-    
     console.log("queryDone:" + json);
     response.write(json);
     response.end();
