@@ -107,6 +107,7 @@ function runServer() {
 
 
         response = res;
+        request = req;
         var currentTime = new Date();
         res.writeHead(200, { 'Content-Type': 'text/plain' });
 
@@ -117,11 +118,51 @@ function runServer() {
             createDb(getAllUsers);
         }
         else if (queryData.cmd == "createuser") {
-            request = req;
+
             createDb(createUser);
         }
+        else if (queryData.cmd == "joingame") {
+
+            json = "{\"status\":\"ok\", \"message\": \"join game requested\"}";
+            console.log(json);
+            response.write(json);
+            response.end();
+        }
+        else if (queryData.cmd == "getnumber") {
+            console.log("getnumber");
+            var randomnumber = Math.floor(Math.random() * 75) + 1;
+
+            var bingoLetter = "";
+            if (randomnumber <= 15) {
+                bingoLetter = "B";
+            }
+            else if (randomnumber <= 30) {
+                bingoLetter = "I";
+            }
+            else if (randomnumber <= 45) {
+                bingoLetter = "N";
+            }
+            else if (randomnumber <= 60) {
+                bingoLetter = "G";
+            }
+
+            else {
+                bingoLetter = "O";
+            }
+
+            //need to work in logic of already existing numbers.
+            //  store in db? can't do query EVERY time.
+            //arrays of arrays to store for each game?
+
+            json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
+            console.log(json);
+            response.write(json);
+            response.end();
+        }
         else {
-            res.write("no parameter provided");
+            json = "{\"status\":\"error\", \"message\": \"no parameter provided\"}";
+            console.log(json);
+            response.write(json);
             response.end();
         }
 
