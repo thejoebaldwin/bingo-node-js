@@ -8,6 +8,8 @@
 var http = require('http');
 var url = require('url');
 var qs = require('querystring');
+var md = require("node-markdown").Markdown;
+var fs = require('fs')
 
 var sqlite3 = require('sqlite3').verbose();
 var db;
@@ -22,43 +24,51 @@ function createDb(callback) {
 }
 
 function getAllUsers() {
-
-    console.log('getAllUsers');
-    db.all("SELECT * FROM user", function (err, rows) {
-        var i = 0;
-        rows.forEach(function (row) {
-            if (i > 0) {
-                json = json + ',\n';
-            }
-            json = json + '{"id": "' + row.id + '", "login": "' + row.login + '"}';
-            //console.log(json);
-            i++;
+    if (request.method == 'POST') {
+        console.log('getAllUsers');
+        db.all("SELECT * FROM user", function (err, rows) {
+            var i = 0;
+            rows.forEach(function (row) {
+                if (i > 0) {
+                    json = json + ',\n';
+                }
+                json = json + '{"id": "' + row.id + '", "login": "' + row.login + '"}';
+                //console.log(json);
+                i++;
+            });
+            json = '{ "users":[\n' + json + '\n]}';
+            closeDb();
+            queryDone();
         });
-        json = '{ "users":[\n' + json + '\n]}';
-        closeDb();
-        queryDone();
-    });
+    }
+    else {
+        helpfile("getallusers");
+    }
 }
 
 
 function getAllGames() {
+    if (request.method == 'POST') {
+        console.log('readAllRows()');
+        db.all("SELECT * FROM Game", function (err, rows) {
+            var i = 0;
+            rows.forEach(function (row) {
+                if (i > 0) {
+                    json = json + ',\n';
+                }
+                var randomnumber = Math.floor(Math.random() * row.user_limit) + 1;
+                json = json + '{"id": "' + row.id + '", "win_limit": "' + row.win_limit + '", "win_count": "' + row.win_count + '", "user_limit": "' + row.user_limit + '","user_count":"' + randomnumber + '", "created_date":"' + row.created_date + '"}';
 
-    console.log('readAllRows()');
-    db.all("SELECT * FROM Game", function (err, rows) {
-        var i = 0;
-        rows.forEach(function (row) {
-            if (i > 0) {
-                json = json + ',\n';
-            }
-            var randomnumber = Math.floor(Math.random() * row.user_limit) + 1;
-            json = json + '{"id": "' + row.id + '", "win_limit": "' + row.win_limit + '", "win_count": "' + row.win_count + '", "user_limit": "' + row.user_limit + '","user_count":"' + randomnumber + '", "created_date":"' + row.created_date + '"}';
-          
-            i++;
+                i++;
+            });
+            closeDb();
+            json = '{ "games":[\n' + json + '\n]}';
+            queryDone();
         });
-        closeDb();
-        json = '{ "games":[\n' + json + '\n]}';
-        queryDone();
-    });
+    }
+    else {
+        helpfile("getallgames");
+    }
 }
 
 
@@ -77,7 +87,27 @@ function createUser() {
             queryDone();
         });
     }
+    else {
+        helpfile("createuser");
+    }
 
+
+
+}
+
+
+function helpfile(filename) {
+    console.log("helpfile requested for " + helpfile);
+    var data = "";
+    fs.readFile(filename + '.md', 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        var html = md(data);
+        response.writeHeader(200, { "Content-Type": "text/html" });
+        response.write(html);
+        response.end();
+    });
 
 
 }
@@ -135,10 +165,17 @@ function runServer() {
             getBoard();
         }
         else {
-            json = "{\"status\":\"error\", \"message\": \"no parameter provided\"}";
-            console.log(json);
-            response.write(json);
-            response.end();
+
+            if (request.method == 'POST') {
+
+                json = "{\"status\":\"error\", \"message\": \"no parameter provided\"}";
+                console.log(json);
+                response.write(json);
+                response.end();
+            }
+            else {
+                helpfile("main");
+            }
         }
 
 
@@ -200,7 +237,7 @@ function joinGame() {
         });
         request.on('end', function () {
             var joinGame = JSON.parse(body);
-        
+
             //VERIFY GAME EXISTS!!!
 
 
@@ -218,10 +255,10 @@ function joinGame() {
             response.write(json);
             response.end();
 
-
-
-          
         });
+    }
+    else {
+        helpfile("joingame");
     }
 
 
@@ -232,36 +269,39 @@ function joinGame() {
 
 function getNumber() {
 
-   
-    var randomnumber = Math.floor(Math.random() * 75) + 1;
+    if (request.method == 'POST') {
+        var randomnumber = Math.floor(Math.random() * 75) + 1;
 
-    var bingoLetter = "";
-    if (randomnumber <= 15) {
-        bingoLetter = "B";
-    }
-    else if (randomnumber <= 30) {
-        bingoLetter = "I";
-    }
-    else if (randomnumber <= 45) {
-        bingoLetter = "N";
-    }
-    else if (randomnumber <= 60) {
-        bingoLetter = "G";
-    }
+        var bingoLetter = "";
+        if (randomnumber <= 15) {
+            bingoLetter = "B";
+        }
+        else if (randomnumber <= 30) {
+            bingoLetter = "I";
+        }
+        else if (randomnumber <= 45) {
+            bingoLetter = "N";
+        }
+        else if (randomnumber <= 60) {
+            bingoLetter = "G";
+        }
 
+        else {
+            bingoLetter = "O";
+        }
+
+        //need to work in logic of already existing numbers.
+        //  store in db? can't do query EVERY time.
+        //arrays of arrays to store for each game?
+
+        json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
+        console.log(json);
+        response.write(json);
+        response.end();
+    }
     else {
-        bingoLetter = "O";
+        helpfile("getnumber");
     }
-
-    //need to work in logic of already existing numbers.
-    //  store in db? can't do query EVERY time.
-    //arrays of arrays to store for each game?
-
-    json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
-    console.log(json);
-    response.write(json);
-    response.end();
-
 
 }
 
