@@ -73,6 +73,8 @@ function createUser() {
             var createuser = JSON.parse(body);
             console.log('createuser:' + createuser.login);
             db.run("INSERT INTO user (login) VALUES ('" + createuser.login + "');", closeDb());
+            json = "{\"status\":\"ok\", \"message\": \"user created successfully\" \"login\":\"" + createuser.login + "\"}";
+            queryDone();
         });
     }
 
@@ -124,41 +126,13 @@ function runServer() {
         }
         else if (queryData.cmd == "joingame") {
 
-            json = "{\"status\":\"ok\", \"message\": \"join game requested\"}";
-            console.log(json);
-            response.write(json);
-            response.end();
+            joinGame();
         }
         else if (queryData.cmd == "getnumber") {
-            console.log("getnumber");
-            var randomnumber = Math.floor(Math.random() * 75) + 1;
-
-            var bingoLetter = "";
-            if (randomnumber <= 15) {
-                bingoLetter = "B";
-            }
-            else if (randomnumber <= 30) {
-                bingoLetter = "I";
-            }
-            else if (randomnumber <= 45) {
-                bingoLetter = "N";
-            }
-            else if (randomnumber <= 60) {
-                bingoLetter = "G";
-            }
-
-            else {
-                bingoLetter = "O";
-            }
-
-            //need to work in logic of already existing numbers.
-            //  store in db? can't do query EVERY time.
-            //arrays of arrays to store for each game?
-
-            json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
-            console.log(json);
-            response.write(json);
-            response.end();
+            getNumber();
+        }
+        else if (queryData.cmd == "getboard") {
+            getBoard();
         }
         else {
             json = "{\"status\":\"error\", \"message\": \"no parameter provided\"}";
@@ -174,6 +148,122 @@ function runServer() {
 
 }
 
+function contains(val, theArray) {
+    for (var i = 0; i < theArray.length; i++) {
+        if (theArray[i] === val) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function generateColumn(offset) {
+    var bingoColumn = new Array();
+
+   
+    var board = "";
+
+    var randomnumber;
+    
+    for (var i = 0; i < 5; i++) {
+
+        //need to check for uniqueness
+        var unique = false;
+        var counter = 0;
+       
+         randomnumber = Math.floor(Math.random() * 15) + offset;
+         while (contains(randomnumber, bingoColumn)) {
+           randomnumber = Math.floor(Math.random() * 15) + offset;
+         }
+         bingoColumn.push(randomnumber);
+    }
+
+    var output = "";
+    for (var i = 0; i < 5; i++) {
+
+     
+        if (output != "")
+        {
+          output = output + ",";
+        }
+        output = output + bingoColumn[i]; 
+    }
+    return output;
+} 
+
+function joinGame() {
+
+    if (request.method == 'POST') {
+        var body = '';
+        request.on('data', function (data) {
+            body += data;
+        });
+        request.on('end', function () {
+            var joinGame = JSON.parse(body);
+        
+            //VERIFY GAME EXISTS!!!
+
+
+            var board = "";
+
+            board = board + generateColumn(1) + ",";
+            board = board + generateColumn(16) + ",";
+            board = board + generateColumn(31) + ",";
+            board = board + generateColumn(46) + ",";
+            board = board + generateColumn(61);
+
+
+            json = "{\"status\":\"ok\", \"message\": \"new board generated\", \"board\": \"" + board + "\" \"game_id\":\"" + joinGame.game_id + "\"}";
+            console.log(json);
+            response.write(json);
+            response.end();
+
+
+
+          
+        });
+    }
+
+
+
+   
+  
+}
+
+function getNumber() {
+
+   
+    var randomnumber = Math.floor(Math.random() * 75) + 1;
+
+    var bingoLetter = "";
+    if (randomnumber <= 15) {
+        bingoLetter = "B";
+    }
+    else if (randomnumber <= 30) {
+        bingoLetter = "I";
+    }
+    else if (randomnumber <= 45) {
+        bingoLetter = "N";
+    }
+    else if (randomnumber <= 60) {
+        bingoLetter = "G";
+    }
+
+    else {
+        bingoLetter = "O";
+    }
+
+    //need to work in logic of already existing numbers.
+    //  store in db? can't do query EVERY time.
+    //arrays of arrays to store for each game?
+
+    json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
+    console.log(json);
+    response.write(json);
+    response.end();
+
+
+}
 
 function queryDone() {
 
