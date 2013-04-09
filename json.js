@@ -57,7 +57,7 @@ function getAllGames() {
                     json = json + ',\n';
                 }
                 var randomnumber = Math.floor(Math.random() * row.user_limit) + 1;
-                json = json + '{"id": "' + row.id + '", "win_limit": "' + row.win_limit + '", "win_count": "' + row.win_count + '", "user_limit": "' + row.user_limit + '","user_count":"' + randomnumber + '", "created_date":"' + row.created_date + '"}';
+                json = json + '{"game_id": "' + row.id + '", "win_limit": "' + row.win_limit + '", "win_count": "' + row.win_count + '", "user_limit": "' + row.user_limit + '","user_count":"' + randomnumber + '", "created_date":"' + row.created_date + '"}';
 
                 i++;
             });
@@ -250,7 +250,7 @@ function joinGame() {
             board = board + generateColumn(61);
 
 
-            json = "{\"status\":\"ok\", \"message\": \"new board generated\", \"board\": \"" + board + "\" \"game_id\":\"" + joinGame.game_id + "\"}";
+            json = "{\"status\":\"ok\", \"message\": \"new board generated\", \"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\"}";
             console.log(json);
             response.write(json);
             response.end();
