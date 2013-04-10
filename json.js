@@ -25,21 +25,42 @@ function createDb(callback) {
 
 function getAllUsers() {
     if (request.method == 'POST') {
-        console.log('getAllUsers');
-        db.all("SELECT * FROM user", function (err, rows) {
-            var i = 0;
-            rows.forEach(function (row) {
-                if (i > 0) {
-                    json = json + ',\n';
-                }
-                json = json + '{"id": "' + row.id + '", "login": "' + row.login + '"}';
-                //console.log(json);
-                i++;
-            });
-            json = '{ "users":[\n' + json + '\n]}';
-            closeDb();
+        var body = '';
+        request.on('data', function (data) {
+            body += data;
+        });
+        request.on('end', function () {
+            try {
+                console.log('getAllUsers');
+                console.log(body);
+                var getAllUsers = JSON.parse(body);
+               
+                db.all("SELECT * FROM user", function (err, rows) {
+                    var i = 0;
+                 
+                    rows.forEach(function (row) {
+                        if (i > 0) {
+                            json = json + ',\n';
+                        }
+                        json = json + '{"id": "' + row.id + '", "login": "' + row.login + '"}';
+                        //console.log(json);
+                        i++;
+                    });
+                  
+                    json = '{ "users":[\n' + json + '\n]}';
+                    closeDb();
+                    queryDone();
+                });
+            }
+            catch (err) {
+                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+                console.log(err);
+            }
             queryDone();
         });
+
+
+      
     }
     else {
         helpfile("getallusers");
@@ -80,11 +101,17 @@ function createUser() {
             body += data;
         });
         request.on('end', function () {
+        try {
             var createuser = JSON.parse(body);
             console.log('createuser:' + createuser.login);
             db.run("INSERT INTO user (login) VALUES ('" + createuser.login + "');", closeDb());
             json = "{\"status\":\"ok\", \"message\": \"user created successfully\" \"login\":\"" + createuser.login + "\"}";
-            queryDone();
+           
+           }
+        catch (err) {
+            json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+        }
+        queryDone();
         });
     }
     else {
@@ -236,6 +263,7 @@ function joinGame() {
             body += data;
         });
         request.on('end', function () {
+        try {
             var joinGame = JSON.parse(body);
 
             //VERIFY GAME EXISTS!!!
@@ -251,6 +279,11 @@ function joinGame() {
 
 
             json = "{\"status\":\"ok\", \"message\": \"new board generated\", \"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\"}";
+         
+        }
+        catch (err) {
+            json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+        }
             console.log(json);
             response.write(json);
             response.end();
@@ -270,34 +303,53 @@ function joinGame() {
 function getNumber() {
 
     if (request.method == 'POST') {
-        var randomnumber = Math.floor(Math.random() * 75) + 1;
 
-        var bingoLetter = "";
-        if (randomnumber <= 15) {
-            bingoLetter = "B";
-        }
-        else if (randomnumber <= 30) {
-            bingoLetter = "I";
-        }
-        else if (randomnumber <= 45) {
-            bingoLetter = "N";
-        }
-        else if (randomnumber <= 60) {
-            bingoLetter = "G";
-        }
 
-        else {
-            bingoLetter = "O";
-        }
+        var body = '';
+        request.on('data', function (data) {
+            body += data;
+        });
+        request.on('end', function () {
+            try {
+                var getNumber = JSON.parse(body);
+                var randomnumber = Math.floor(Math.random() * 75) + 1;
 
-        //need to work in logic of already existing numbers.
-        //  store in db? can't do query EVERY time.
-        //arrays of arrays to store for each game?
+                var bingoLetter = "";
+                if (randomnumber <= 15) {
+                    bingoLetter = "B";
+                }
+                else if (randomnumber <= 30) {
+                    bingoLetter = "I";
+                }
+                else if (randomnumber <= 45) {
+                    bingoLetter = "N";
+                }
+                else if (randomnumber <= 60) {
+                    bingoLetter = "G";
+                }
 
-        json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
-        console.log(json);
-        response.write(json);
-        response.end();
+                else {
+                    bingoLetter = "O";
+                }
+
+                //need to work in logic of already existing numbers.
+                //  store in db? can't do query EVERY time.
+                //arrays of arrays to store for each game?
+
+                json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
+               
+            }
+            catch (err) {
+                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+            }
+            console.log(json);
+            response.write(json);
+            response.end();
+
+        });
+
+
+     
     }
     else {
         helpfile("getnumber");
