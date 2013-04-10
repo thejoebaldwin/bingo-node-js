@@ -18,7 +18,7 @@ var request;
 var json;
 
 function createDb(callback) {
-    console.log("createDb");
+    //console.log("createDb");
     json = ''
     db = new sqlite3.Database('bingo.s3db', callback);
 }
@@ -124,7 +124,7 @@ function createUser() {
 
 
 function helpfile(filename) {
-    console.log("helpfile requested for " + helpfile);
+    console.log("helpfile requested for " + filename);
     var data = "";
     fs.readFile(filename + '.md', 'utf8', function (err, data) {
         if (err) {
@@ -158,10 +158,13 @@ function runServer() {
         if (req.url === '/favicon.ico') {
             res.writeHead(200, { 'Content-Type': 'image/x-icon' });
             res.end();
-            console.log('favicon requested');
+            //console.log('favicon requested');
             return;
         }
 
+        var date = new Date();
+        var current_hour = date.getHours();
+        console.log(date);
 
         var queryData = url.parse(req.url, true).query;
 
