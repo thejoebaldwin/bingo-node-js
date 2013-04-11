@@ -1,6 +1,6 @@
 #Get All Games  
 
-POST Request to http://bingo.humboldttechgroup.com:1111/?cmd=allgames
+**POST Request to http://bingo.humboldttechgroup.com:1111/?cmd=allgames**
 
 Returns all currently in progress games, with the following information:
 

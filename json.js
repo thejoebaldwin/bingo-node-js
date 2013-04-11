@@ -34,20 +34,20 @@ function getAllUsers() {
                 console.log('getAllUsers');
                 console.log(body);
                 var getAllUsers = JSON.parse(body);
-               
+
                 db.all("SELECT * FROM user", function (err, rows) {
                     var i = 0;
-                 
+
                     rows.forEach(function (row) {
                         if (i > 0) {
                             json = json + ',\n';
                         }
-                        json = json + '{"id": "' + row.id + '", "login": "' + row.login + '"}';
+                        json = json + '{"user_id": "' + row.id + '", "login": "' + row.login + '"}';
                         //console.log(json);
                         i++;
                     });
-                  
-                    json = '{ "users":[\n' + json + '\n]}';
+                    var now = new Date();
+                    json = '{"status":"ok","message":"list of users for game in progress","timestamp":"' + now.getTime() + '", "users":[\n' + json + '\n]}';
                     closeDb();
                     queryDone();
                 });
@@ -78,12 +78,14 @@ function getAllGames() {
                     json = json + ',\n';
                 }
                 var randomnumber = Math.floor(Math.random() * row.user_limit) + 1;
+             
                 json = json + '{"game_id": "' + row.id + '", "win_limit": "' + row.win_limit + '", "win_count": "' + row.win_count + '", "user_limit": "' + row.user_limit + '","user_count":"' + randomnumber + '", "created_date":"' + row.created_date + '"}';
 
                 i++;
             });
             closeDb();
-            json = '{ "games":[\n' + json + '\n]}';
+            var now = new Date();
+            json = '{"timestamp":"' + now.getTime() + '","games":[\n' + json + '\n]}';
             queryDone();
         });
     }
@@ -101,17 +103,39 @@ function createUser() {
             body += data;
         });
         request.on('end', function () {
-        try {
-            var createuser = JSON.parse(body);
-            console.log('createuser:' + createuser.login);
-            db.run("INSERT INTO user (login) VALUES ('" + createuser.login + "');", closeDb());
-            json = "{\"status\":\"ok\", \"message\": \"user created successfully\" \"login\":\"" + createuser.login + "\"}";
-           
-           }
-        catch (err) {
-            json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
-        }
-        queryDone();
+            try {
+                var createuser = JSON.parse(body);
+                console.log('createuser:' + createuser.login);
+          
+                var user_id = -1;
+                var counter = 0;
+                console.log("SELECT * FROM user WHERE login='" + createuser.login + "';");
+                db.all("SELECT * FROM user WHERE login='" + createuser.login + "';", function (err, rows) {
+                    rows.forEach(function (row) {
+                        counter++;
+                        user_id = row["id"];
+                    });
+                    var now = new Date();
+                    if (counter <= 0) {
+                        db.run("INSERT INTO user (login) VALUES ('" + createuser.login + "');", function (err) {
+                            json = "{\"status\":\"ok\", \"message\": \"user sucessfully created\" \"login\":\"" + createuser.login + "\",\"user_id\":\"" + this.lastID + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                            queryDone();
+                        });
+
+                    }
+                    else {
+                        json = "{\"status\":\"ok\", \"message\": \"user already exists\" \"login\":\"" + createuser.login + "\",\"user_id\":\"" + user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                    }
+                    queryDone();
+                });
+
+
+            }
+            catch (err) {
+                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+                queryDone();
+            }
+
         });
     }
     else {
@@ -140,7 +164,7 @@ function helpfile(filename) {
 }
 
 function closeDb() {
-    console.log("closeDb");
+    //console.log("closeDb");
   //  db.close();
 }
 
@@ -162,9 +186,7 @@ function runServer() {
             return;
         }
 
-        var date = new Date();
-        var current_hour = date.getHours();
-        console.log(date);
+
 
         var queryData = url.parse(req.url, true).query;
 
@@ -174,7 +196,13 @@ function runServer() {
         var currentTime = new Date();
         res.writeHead(200, { 'Content-Type': 'text/plain' });
 
-        if (queryData.cmd == "allgames") {
+        if (queryData.cmd == "poll") {
+            json = "1";
+            response.write(json);
+            response.end();
+            return;
+        }
+        else if (queryData.cmd == "allgames") {
             createDb(getAllGames);
         }
         else if (queryData.cmd == "allusers") {
@@ -207,7 +235,9 @@ function runServer() {
                 helpfile("main");
             }
         }
-
+        var date = new Date();
+        var current_hour = date.getHours();
+        console.log(date);
 
 
 
@@ -266,27 +296,27 @@ function joinGame() {
             body += data;
         });
         request.on('end', function () {
-        try {
-            var joinGame = JSON.parse(body);
+            try {
+                var joinGame = JSON.parse(body);
 
-            //VERIFY GAME EXISTS!!!
-
-
-            var board = "";
-
-            board = board + generateColumn(1) + ",";
-            board = board + generateColumn(16) + ",";
-            board = board + generateColumn(31) + ",";
-            board = board + generateColumn(46) + ",";
-            board = board + generateColumn(61);
+                //VERIFY GAME EXISTS!!!
 
 
-            json = "{\"status\":\"ok\", \"message\": \"new board generated\", \"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\"}";
-         
-        }
-        catch (err) {
-            json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
-        }
+                var board = "";
+
+                board = board + generateColumn(1) + ",";
+                board = board + generateColumn(16) + ",";
+                board = board + generateColumn(31) + ",";
+                board = board + generateColumn(46) + ",";
+                board = board + generateColumn(61);
+
+                var now = new Date();
+                json = "{\"status\":\"ok\", \"message\": \"new board generated\", \"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+
+            }
+            catch (err) {
+                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+            }
             console.log(json);
             response.write(json);
             response.end();
@@ -338,8 +368,8 @@ function getNumber() {
                 //need to work in logic of already existing numbers.
                 //  store in db? can't do query EVERY time.
                 //arrays of arrays to store for each game?
-
-                json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\"}";
+                var now = new Date();
+                json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\", \"timestamp\":\"" +  now.getTime() + "\"}";
                
             }
             catch (err) {

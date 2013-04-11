@@ -3,6 +3,7 @@
 **POST Request to http://bingo.humboldttechgroup.com:1111/?cmd=joingame**
 
 Use this command to join a login to an existing game. A successful response will return the Game ID and a comma delimited list of numbers, in order, that make up the user's bingo card. The numbers should be placed in the card from top to bottom in a 5 x 5 grid. For example: using the below "board" data should produce a card with the following numbers in the "B" column, from top to bottom: 12, 1, 15, 2, and 9.
+
 * * *
 
 ##Sample request body: 
@@ -17,9 +18,10 @@ Use this command to join a login to an existing game. A successful response will
 ##Sample response data:
 
 	{  
-		"status":"ok",  
+		 "status":"ok",  
  		"message": "new board generated",  
  		"board": "12,1,15,2,9,24,30,22,18,21,34,43,45,31,42,54,50,58,56,55,68,63,70,72,62",  
- 		"game_id":"0"  
+ 		"game_id":"0",
+		"timestamp": "1234567890"
 	}
 * * *
