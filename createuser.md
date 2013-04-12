@@ -2,7 +2,7 @@
 
 **POST Request to http://bingo.humboldttechgroup.com:1111/?cmd=createuser**
 
-Creates a user and returns a user_id, or user_id if given login name already exists.
+Creates a user and returns a user\_id, or existing user\_id if given login name already exists.
 
 * * *
 
@@ -10,8 +10,7 @@ Creates a user and returns a user_id, or user_id if given login name already exi
 
 	{  
 		"timestamp": "1234567890",  
-		"game_id": "0",
-		"user_id": "1"  
+		"login": "bingowizard"  
 	}
 * * *
 
@@ -20,8 +19,8 @@ Creates a user and returns a user_id, or user_id if given login name already exi
 	{  
 		"status": "ok",  
 		"message": "user created successfully",
-		"login": "yourusername",
-		"user_id": "0",
+		"login": "bingowizard",
+		"user_id": "1",
 		"timestamp": "1234567890"    
 	}
 If user login already exists, the following response will be returned instead:  
@@ -29,8 +28,8 @@ If user login already exists, the following response will be returned instead:
 	{  
 		"status": "ok",  
 		"message": "user already exists",
-		"login": "yourusername",
-		"user_id": "0",
+		"login": "bingowizard",
+		"user_id": "1",
 		"timestamp": "1234567890"    
 	}
 * * *
