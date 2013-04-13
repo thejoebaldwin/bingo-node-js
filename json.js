@@ -38,22 +38,28 @@ function getAllUsers() {
                 console.log(body);
                 var getAllUsers = JSON.parse(body);
                 if (getAllUsers.game_id != undefined) {
-                    db.all("SELECT * FROM user as u,board as b WHERE u.id = b.user_id AND b.game_id = " + getAllUsers.game_id + ";", function (err, rows) {
-                        var i = 0;
+                    if (!isNaN(getAllUsers.game_id)) {
+                        db.all("SELECT * FROM user as u,board as b WHERE u.id = b.user_id AND b.game_id = " + getAllUsers.game_id + ";", function (err, rows) {
+                            var i = 0;
 
-                        rows.forEach(function (row) {
-                            if (i > 0) {
-                                json = json + ',\n';
-                            }
-                            json = json + '{"game_id":"' + row.game_id + '","user_id": "' + row.user_id + '", "login": "' + row.login + '"}';
-                            //console.log(json);
-                            i++;
+                            rows.forEach(function (row) {
+                                if (i > 0) {
+                                    json = json + ',\n';
+                                }
+                                json = json + '{"game_id":"' + row.game_id + '","user_id": "' + row.user_id + '", "login": "' + row.login + '"}';
+                                //console.log(json);
+                                i++;
+                            });
+                            var now = new Date();
+                            json = '{"status":"ok","message":"list of users for game in progress","timestamp":"' + now.getTime() + '", "users":[\n' + json + '\n]}';
+                            //closeDb();
+                            queryDone();
                         });
-                        var now = new Date();
-                        json = '{"status":"ok","message":"list of users for game in progress","timestamp":"' + now.getTime() + '", "users":[\n' + json + '\n]}';
-                        //closeDb();
+                    }
+                    else {
+                        json = "{\"status\":\"error\", \"message\": \"game_id must be numeric. Please check documentation.\"}";
                         queryDone();
-                    });
+                    }
                 }
                 else {
                     json = "{\"status\":\"error\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
@@ -131,7 +137,7 @@ function createUser() {
 
                         }
                         else {
-                            json = "{\"status\":\"ok\", \"message\": \"user already exists\" \"login\":\"" + createuser.login + "\",\"user_id\":\"" + user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                            json = "{\"status\":\"ok\", \"message\": \"user already exists\", \"login\":\"" + createuser.login + "\",\"user_id\":\"" + user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
                             queryDone();
                         }
 
@@ -314,6 +320,7 @@ function joinGame() {
                 var joinGame = JSON.parse(body);
                 //check if game exists
                 if (joinGame.game_id != undefined && joinGame.user_id != undefined) {
+                   if(!isNaN(joinGame.game_id) && !isNaN(joinGame.user_id)) {
                     db.all("SELECT * FROM game WHERE id=" + joinGame.game_id + ";", function (err, rows) {
                         rows.forEach(function (row) {
                             counter++;
@@ -322,11 +329,11 @@ function joinGame() {
                         if (counter > 0) {
                             //reset counter
                             counter = 0;
-                            //check if user has already been added to game
+                            
                             var board = "";
                             var board_id = "";
-
-                            db.all("SELECT * FROM board WHERE user_id=" + joinGame.user_id + ";", function (err, rows) {
+                            //check if user has already been added to game
+                            db.all("SELECT * FROM board WHERE user_id=" + joinGame.user_id + " AND game_id=" + joinGame.game_id + ";", function (err, rows) {
                                 rows.forEach(function (row) {
                                     counter++;
                                     board = row["contents"];
@@ -362,6 +369,12 @@ function joinGame() {
                             queryDone();
                         }
                     });
+                    }
+                    else
+                    {
+                      json = "{\"status\":\"error\", \"message\": \"game_id and user_id must be numeric values. Please check documentation.\"}";
+                      queryDone();
+                    }
                 }
                 else {
                     json = "{\"status\":\"error\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
@@ -401,44 +414,54 @@ function getNumber() {
                 var getNumber = JSON.parse(body);
                 var counter = 0;
                 if (getNumber.game_id != undefined && getNumber.user_id != undefined) {
-                    db.all("SELECT * FROM board WHERE game_id=" + getNumber.game_id + " AND user_id = " + getNumber.user_id + ";", function (err, rows) {
-                        rows.forEach(function (row) {
-                            counter++;
-                        });
-                        if (counter > 0) {
-                            var randomnumber = Math.floor(Math.random() * 75) + 1;
+                    if (!isNaN(getNumber.game_id) && !isNaN(getNumber.user_id)) {
+                        db.all("SELECT * FROM board WHERE game_id=" + getNumber.game_id + " AND user_id = " + getNumber.user_id + ";", function (err, rows) {
+                            rows.forEach(function (row) {
+                                counter++;
+                            });
+                            if (counter > 0) {
+                                var randomnumber = Math.floor(Math.random() * 75) + 1;
 
-                            var bingoLetter = "";
-                            if (randomnumber <= 15) {
-                                bingoLetter = "B";
-                            }
-                            else if (randomnumber <= 30) {
-                                bingoLetter = "I";
-                            }
-                            else if (randomnumber <= 45) {
-                                bingoLetter = "N";
-                            }
-                            else if (randomnumber <= 60) {
-                                bingoLetter = "G";
-                            }
+                                var bingoLetter = "";
+                                if (randomnumber <= 15) {
+                                    bingoLetter = "B";
+                                }
+                                else if (randomnumber <= 30) {
+                                    bingoLetter = "I";
+                                }
+                                else if (randomnumber <= 45) {
+                                    bingoLetter = "N";
+                                }
+                                else if (randomnumber <= 60) {
+                                    bingoLetter = "G";
+                                }
 
+                                else {
+                                    bingoLetter = "O";
+                                }
+
+                                //need to work in logic of already existing numbers.
+                                //  store in db? can't do query EVERY time.
+                                //arrays of arrays to store for each game?
+                                var now = new Date();
+                                json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+
+                                queryDone();
+                            }
                             else {
-                                bingoLetter = "O";
+                                json = "{\"status\":\"error\", \"message\": \"user has not joined that game\"}";
+                                queryDone();
                             }
 
-                            //need to work in logic of already existing numbers.
-                            //  store in db? can't do query EVERY time.
-                            //arrays of arrays to store for each game?
-                            var now = new Date();
-                            json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\", \"timestamp\":\"" + now.getTime() + "\"}";
 
-                            queryDone();
+                        });
+                    }
+                     
+                        else
+                        {
+                              json = "{\"status\":\"error\", \"message\": \"game_id and user_id must be numeric values. Please check documentation.\"}";
+                                queryDone();
                         }
-                        else {
-                            json = "{\"status\":\"error\", \"message\": \"user has not joined that game\"}";
-                            queryDone();
-                        }
-                    });
                 }
                 else {
                     json = "{\"status\":\"error\", \"message\": \"Request body missing required fields. Please check documentation.\"}";

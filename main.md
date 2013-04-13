@@ -12,7 +12,7 @@ Usage
 
 
 - Get a list of all currently in progress games. Within each block of "game" data, there is a game\_id.
-- Create a user. This will give you a user\_id that you can then join a game with. You can use "bingowizard" for login and/or "1" for user_id (see below) if you'd liek to skip this step.
+- Create a user. This will give you a user\_id that you can then join a game with. You can use "bingowizard" for login and/or "1" for user_id (see below) if you'd like to skip this step.
 - Join a game using the user\_id and game\_id. This will return a "board" that you will use to construct your bingo card.
 - Once you have your board, call use the get number operation to play the game!
 - Be sure to check the response messages when getting errors to help troubleshoot your requests, and don't forget to validate your json.
