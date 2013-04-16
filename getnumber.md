@@ -25,10 +25,11 @@ Returns the next drawn number in a given game. The user\_id must match that of a
 ##Sample response data:
 
 	{  
-		"status":"ok",  
+		"status": "ok",  
+		"command": "getnumber",
 		"message": "newest number is",
-		"game_id":"1",  
-		"number":"B12",
+		"game_id": "1",  
+		"number": "B12",
 		"timestamp": "1234567890"    
 	}
 * * *

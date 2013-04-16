@@ -25,6 +25,7 @@ Returns all currently in progress games
 
 	{
 		"status": "ok",
+		"command": "allgames",
 		"message": "successfully retrieved list of active games",  
 	 	"games":[  
 					{

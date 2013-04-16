@@ -18,6 +18,7 @@ Creates a user and returns a user\_id, or existing user\_id if given login name 
 
 	{  
 		"status": "ok",  
+		"command": "createuser",
 		"message": "user created successfully",
 		"login": "bingowizard",
 		"user_id": "1",
@@ -27,6 +28,7 @@ If user login already exists, the following response will be returned instead:
 
 	{  
 		"status": "ok",  
+		"command": "createuser",
 		"message": "user already exists",
 		"login": "bingowizard",
 		"user_id": "1",

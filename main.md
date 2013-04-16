@@ -7,10 +7,13 @@ Supported Operations
 - [Create User](http://bingo.humboldttechgroup.com:1111/?cmd=createuser "Create User")
 - [Join Game](http://bingo.humboldttechgroup.com:1111/?cmd=joingame "Join Game")
 - [Get Number](http://bingo.humboldttechgroup.com:1111/?cmd=getnumber "Get Number")
+- [Quit Game](http://bingo.humboldttechgroup.com:1111/?cmd=quitgame "Quit Game")
 
 Usage  
 
 
+- All json field names in the response will be lowercase only. All field names in request need to be lowercase as well.
+- All responses will return a "command" parameter. This will allow you to standardize your json parsing depending on which request you are making.
 - Get a list of all currently in progress games. Within each block of "game" data, there is a game\_id.
 - Create a user. This will give you a user\_id that you can then join a game with. You can use "bingowizard" for login and/or "1" for user_id (see below) if you'd like to skip this step.
 - Join a game using the user\_id and game\_id. This will return a "board" that you will use to construct your bingo card.

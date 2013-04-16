@@ -28,6 +28,7 @@ Use this command to join a login to an existing game. A successful response will
 
 	{  
 		"status": "ok",  
+		"command": "joingame",
  		"message": "game sucessfully joined",  
 		"board_id": "1",
  		"board": "12,1,15,2,9,24,30,22,18,21,34,43,45,31,42,54,50,58,56,55,68,63,70,72,62",  
@@ -39,6 +40,7 @@ If user has already joined game, the following will be returned instead, with th
 	
 	{  
 		"status": "ok",  
+		"command": "joingame",
  		"message": "user already joined game",  
 		"board_id": "1",
  		"board": "12,1,15,2,9,24,30,22,18,21,34,43,45,31,42,54,50,58,56,55,68,63,70,72,62",  

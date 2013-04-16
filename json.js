@@ -51,23 +51,23 @@ function getAllUsers() {
                                 i++;
                             });
                             var now = new Date();
-                            json = '{"status":"ok","message":"list of users for game in progress","timestamp":"' + now.getTime() + '", "users":[\n' + json + '\n]}';
+                            json = '{"status":"ok", \"command\":\"allusers\", \"message":"list of users for game in progress","timestamp":"' + now.getTime() + '", "users":[\n' + json + '\n]}';
                             //closeDb();
                             queryDone();
                         });
                     }
                     else {
-                        json = "{\"status\":\"error\", \"message\": \"game_id must be numeric. Please check documentation.\"}";
+                        json = "{\"status\":\"error\", \"command\":\"allusers\",  \"message\": \"game_id must be numeric. Please check documentation.\"}";
                         queryDone();
                     }
                 }
                 else {
-                    json = "{\"status\":\"error\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
+                    json = "{\"status\":\"error\", \"command\":\"allusers\",  \"message\": \"Request body missing required fields. Please check documentation.\"}";
                     queryDone();
                 }
             }
             catch (err) {
-                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+                json = "{\"status\":\"error\", \"command\":\"allusers\",  \"message\": \"there was an error with your post json formatting\"}";
                 console.log(err);
                 queryDone();
             }
@@ -97,7 +97,7 @@ function getAllGames() {
             });
             //closeDb();
             var now = new Date();
-            json = '{\"status\": \"ok\", \"message\": \"successfully retrieved list of active games\", "timestamp":"' + now.getTime() + '","games":[\n' + json + '\n]}';
+            json = '{\"status\": \"ok\", \"command\":\"allgames\",  \"message\": \"successfully retrieved list of active games\", "timestamp":"' + now.getTime() + '","games":[\n' + json + '\n]}';
             queryDone();
         });
     }
@@ -131,27 +131,27 @@ function createUser() {
                         var now = new Date();
                         if (counter <= 0) {
                             db.run("INSERT INTO user (login) VALUES ('" + createuser.login + "');", function (err) {
-                                json = "{\"status\":\"ok\", \"message\": \"user sucessfully created\", \"login\":\"" + createuser.login + "\",\"user_id\":\"" + this.lastID + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                                json = "{\"status\":\"ok\", \"command\":\"createuser\",  \"message\": \"user sucessfully created\", \"login\":\"" + createuser.login + "\",\"user_id\":\"" + this.lastID + "\", \"timestamp\":\"" + now.getTime() + "\"}";
                                 queryDone();
                             });
 
                         }
                         else {
-                            json = "{\"status\":\"ok\", \"message\": \"user already exists\", \"login\":\"" + createuser.login + "\",\"user_id\":\"" + user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                            json = "{\"status\":\"ok\", \"command\":\"createuser\",  \"message\": \"user already exists\", \"login\":\"" + createuser.login + "\",\"user_id\":\"" + user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
                             queryDone();
                         }
 
                     });
                 }
                 else {
-                    json = "{\"status\":\"error\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
+                    json = "{\"status\":\"error\", \"command\":\"createuser\",  \"message\": \"Request body missing required fields. Please check documentation.\"}";
                     queryDone();
                 }
 
 
             }
             catch (err) {
-                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+                json = "{\"status\":\"error\", \"command\":\"createuser\",  \"message\": \"there was an error with your post json formatting\"}";
                 queryDone();
             }
 
@@ -240,12 +240,15 @@ function runServer() {
         }
         else if (queryData.cmd == "getboard") {
              createDb(getBoard());
-        }
+         }
+        else if (queryData.cmd == "quitgame") {
+             createDb(quitGame());
+         }
         else {
 
             if (request.method == 'POST') {
 
-                json = "{\"status\":\"error\", \"message\": \"no parameter provided\"}";
+                json = "{\"status\":\"error\", \"message\": \"no correct parameter provided\"}";
                 console.log(json);
                 response.write(json);
                 response.end();
@@ -352,38 +355,38 @@ function joinGame() {
 
                                     db.run("INSERT INTO board (user_id,game_id,contents) VALUES (" + joinGame.user_id + "," + joinGame.game_id + ",'" + board + "');", function (err) {
                                         var now = new Date();
-                                        json = "{\"status\":\"ok\", \"message\": \"game sucessfully joined\",\"board_id\":\"" + this.lastID + "\",\"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\",\"user_id\":\"" + joinGame.user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                                        json = "{\"status\":\"ok\", \"command\":\"joingame\", \"message\": \"game sucessfully joined\",\"board_id\":\"" + this.lastID + "\",\"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\",\"user_id\":\"" + joinGame.user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
                                         queryDone();
                                     });
                                 }
                                 else {
                                     var now = new Date();
-                                    json = "{\"status\":\"ok\", \"message\": \"user already joined game\",\"board_id\":\"" + board_id + "\",\"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\",\"user_id\":\"" + joinGame.user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                                    json = "{\"status\":\"ok\", \"command\":\"joingame\", \"message\": \"user already joined game\",\"board_id\":\"" + board_id + "\",\"board\": \"" + board + "\", \"game_id\":\"" + joinGame.game_id + "\",\"user_id\":\"" + joinGame.user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
                                     queryDone();
                                 }
                             });
                         }
                         else {
                             //game not found
-                            json = "{\"status\":\"error\", \"message\": \"no game exists with game_id " + joinGame.game_id + " \"}";
+                            json = "{\"status\":\"error\", \"command\":\"joingame\", \"message\": \"no game exists with game_id " + joinGame.game_id + " \"}";
                             queryDone();
                         }
                     });
                     }
                     else
                     {
-                      json = "{\"status\":\"error\", \"message\": \"game_id and user_id must be numeric values. Please check documentation.\"}";
+                      json = "{\"status\":\"error\", \"command\":\"joingame\", \"message\": \"game_id and user_id must be numeric values. Please check documentation.\"}";
                       queryDone();
                     }
                 }
                 else {
-                    json = "{\"status\":\"error\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
+                    json = "{\"status\":\"error\", \"command\":\"joingame\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
                     queryDone();
                 }
 
             }
             catch (err) {
-                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\", \"error\":\"" + err + "\"}";
+                json = "{\"status\":\"error\", \"command\":\"joingame\",  \"message\": \"there was an error with your post json formatting\", \"error\":\"" + err + "\"}";
                 console.log(json);
                 response.write(json);
                 response.end();
@@ -398,8 +401,98 @@ function joinGame() {
 
 
 
-   
-  
+
+
+}
+
+
+function quitGame() {
+
+    if (request.method == 'POST') {
+        var body = '';
+        request.on('data', function (data) {
+            body += data;
+        });
+        request.on('end', function () {
+            try {
+                var counter = 0;
+                var joinGame = JSON.parse(body);
+                //check if game exists
+                if (joinGame.game_id != undefined && joinGame.user_id != undefined) {
+                    if (!isNaN(joinGame.game_id) && !isNaN(joinGame.user_id)) {
+                        db.all("SELECT * FROM game WHERE id=" + joinGame.game_id + ";", function (err, rows) {
+                            rows.forEach(function (row) {
+                                counter++;
+                            });
+                            //game exists
+                            if (counter > 0) {
+                                //reset counter
+                                counter = 0;
+
+                                var board = "";
+                                var board_id = "";
+                                //check if user has already been added to game
+                                db.all("SELECT * FROM board WHERE user_id=" + joinGame.user_id + " AND game_id=" + joinGame.game_id + ";", function (err, rows) {
+                                    rows.forEach(function (row) {
+                                        counter++;
+                                        board = row["contents"];
+                                        board_id = row["id"];
+                                    });
+                                    //user has not been joined to game
+                                    if (counter > 0) {
+                                     
+                                      
+
+
+                                        db.run("DELETE FROM board WHERE user_id = " + joinGame.user_id + " AND game_id = " + joinGame.game_id + ";", function (err) {
+                                            var now = new Date();
+                                            json = "{\"status\":\"ok\", \"command\":\"quitgame\", \"message\": \"game sucessfully quit\", \"game_id\":\"" + joinGame.game_id + "\",\"user_id\":\"" + joinGame.user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                                            queryDone();
+                                        });
+                                    }
+                                    else {
+                                        var now = new Date();
+                                        json = "{\"status\":\"ok\", \"command\":\"quitgame\", \"message\": \"user is not joined to game\", \"game_id\":\"" + joinGame.game_id + "\",\"user_id\":\"" + joinGame.user_id + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                                        queryDone();
+                                    }
+                                });
+                            }
+                            else {
+                                //game not found
+                                json = "{\"status\":\"error\", \"command\":\"quitgame\", \"message\": \"no game exists with game_id " + joinGame.game_id + " \"}";
+                                queryDone();
+                            }
+                        });
+                    }
+                    else {
+                        json = "{\"status\":\"error\", \"command\":\"quitgame\", \"message\": \"game_id and user_id must be numeric values. Please check documentation.\"}";
+                        queryDone();
+                    }
+                }
+                else {
+                    json = "{\"status\":\"error\", \"command\":\"quitgame\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
+                    queryDone();
+                }
+
+            }
+            catch (err) {
+                json = "{\"status\":\"error\", \"command\":\"quitgame\",  \"message\": \"there was an error with your post json formatting\", \"error\":\"" + err + "\"}";
+                console.log(json);
+                response.write(json);
+                response.end();
+            }
+
+
+        });
+    }
+    else {
+        helpfile("quitgame");
+    }
+
+
+
+
+
 }
 
 function getNumber() {
@@ -444,12 +537,12 @@ function getNumber() {
                                 //  store in db? can't do query EVERY time.
                                 //arrays of arrays to store for each game?
                                 var now = new Date();
-                                json = "{\"status\":\"ok\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\", \"timestamp\":\"" + now.getTime() + "\"}";
+                                json = "{\"status\":\"ok\", \"command\":\"getnumber\", \"message\": \"number requested\", \"number\":\"" + bingoLetter + randomnumber + "\", \"timestamp\":\"" + now.getTime() + "\"}";
 
                                 queryDone();
                             }
                             else {
-                                json = "{\"status\":\"error\", \"message\": \"user has not joined that game\"}";
+                                json = "{\"status\":\"error\", \"command\":\"getnumber\", \"message\": \"user has not joined that game\"}";
                                 queryDone();
                             }
 
@@ -459,19 +552,19 @@ function getNumber() {
                      
                         else
                         {
-                              json = "{\"status\":\"error\", \"message\": \"game_id and user_id must be numeric values. Please check documentation.\"}";
+                            json = "{\"status\":\"error\", \"command\":\"getnumber\", \"message\": \"game_id and user_id must be numeric values. Please check documentation.\"}";
                                 queryDone();
                         }
                 }
                 else {
-                    json = "{\"status\":\"error\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
+                    json = "{\"status\":\"error\", \"command\":\"getnumber\", \"message\": \"Request body missing required fields. Please check documentation.\"}";
                     queryDone();
                 }
 
 
             }
             catch (err) {
-                json = "{\"status\":\"error\", \"message\": \"there was an error with your post json formatting\"}";
+                json = "{\"status\":\"error\", \"command\":\"getnumber\", \"message\": \"there was an error with your post json formatting\"}";
                 queryDone();
             }
 

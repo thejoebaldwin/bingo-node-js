@@ -24,18 +24,19 @@ Returns all currently joined users in a given game
 ##Sample response data:
 
 	{  
-		"status":"ok",  
+		"status": "ok",  
+		"command": "allusers",
  		"message": "list of users for game in progress",
-		"game_id":"1",  
+		"game_id": "1",  
 		"timestamp": "1234567890",    
  		"users": [
 			{
-			"user_id":"1",
-			"login":"bingowizard"
+			"user_id": "1",
+			"login": "bingowizard"
 			},
 			{
-			"user_id":"2",
-			"login":"bingobarian"
+			"user_id": "2",
+			"login": "bingobarian"
 			}
 		 ]
 	}
